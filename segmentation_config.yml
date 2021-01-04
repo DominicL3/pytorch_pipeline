@@ -1,0 +1,74 @@
+TASK: "segmentation" # 'segmentation' or 'classification'
+
+PATHS:
+  # make sure paths to data are in glob format
+  # i.e. /path/to/data/train/*.tif instead of /path/to/data/train/
+  train:
+    root_dir: &train_dir /path/to/training/data
+    images:
+      root_dir: *train_dir
+      base_path: images/*.png
+    masks:
+      root_dir: *train_dir
+      base_path: masks/*.png
+  val:
+    root_dir: &val_dir /path/to/validation/data
+    images:
+      root_dir: *val_dir
+      base_path: images/*.png
+    masks:
+      root_dir: *val_dir
+      base_path: masks/*.png
+
+  results_dir: &results_dir /path/to/store/results
+  # by default, model and logs will be saved in results_dir but they can be saved wherever
+  model_save:
+    root_dir: *results_dir
+    base_path: model.pt
+  logs_dir:
+    root_dir: *results_dir
+    base_path: logs
+
+PREPROCESSING:
+  image: normalize
+  mask: null
+
+# data augmentations using albumentations
+# provide args to augmentation as dict
+AUGMENTATIONS:
+  Flip: {'p': 0.5}
+  RandomRotate90: {'p': 0.5}
+  CropNonEmptyMaskIfExists: {'height': 256, 'width': 256, 'p': 0.35}
+  RGBShift: {'r_shift_limit': 15, 'g_shift_limit': 15, 'b_shift_limit': 15, 'p': 0.5}
+
+MODEL:
+  base_model: Unet
+  encoder_name: resnet18
+  encoder_weights: null
+  in_channels: 1
+  classes: 3
+
+# loss function names can be found in https://smp.readthedocs.io/en/latest/losses.html
+# OR custom loss classes written in losses.py
+LOSS:
+  name: DiceLoss
+  mode: multiclass
+
+OPTIMIZER:
+  name: Adam
+  lr: 0.001
+
+# args for Pytorch DataLoader
+# https://pytorch.org/docs/stable/data.html?highlight=dataloader#torch.utils.data.DataLoader
+DATALOADER:
+  batch_size: 16
+  shuffle: True
+  num_workers: 1
+  pin_memory: False
+
+# args for Pytorch Lightning's Trainer class used to handle training loop
+# https://pytorch-lightning.readthedocs.io/en/latest/trainer.html
+TRAINER:
+  logger: True
+  gpus: -1 # train on all GPUs set by $CUDA_VISIBLE_DEVICES
+  accelerator: null # needs to be changed if number of GPUs > 1, see documentation
