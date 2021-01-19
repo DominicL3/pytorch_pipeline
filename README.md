@@ -8,4 +8,4 @@ Currently this pipeline can only train for segmentation tasks, but I plan to exp
 - Pytorch
 - Pytorch Lightning (https://pytorch-lightning.readthedocs.io/en/latest/)
 - albumentations (https://albumentations.ai/)
-- segmentation-models (https://smp.readthedocs.io/en/latest)
+- segmentation-models-pytorch (https://smp.readthedocs.io/en/latest)
